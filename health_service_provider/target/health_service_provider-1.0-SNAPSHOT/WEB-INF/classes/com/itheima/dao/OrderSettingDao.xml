@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.OrderSettingDao">
+
+    <!--Long findCountByOrderDate(String orderDate);-->
+    <!--根据时间查找表中是否存在记录-->
+    <select id="findCountByOrderDate"  resultType="long">
+         select count(*) from t_ordersetting where orderDate = #{orderDate}
+    </select>
+
+    <!--void editNumberByOrderDate(OrderSetting orderSetting);;-->
+    <!--查到存在记录则更新表中记录-->
+    <update id="editNumberByOrderDate" parameterType="com.itheima.pojo.OrderSetting">
+        update t_ordersetting set number = #{number} where orderDate = #{orderDate}
+    </update>
+
+
+    <!--void add(OrderSetting orderSetting);-->
+    <!--查不到记录则插入记录-->
+    <insert id="add" parameterType="com.itheima.pojo.OrderSetting">
+         insert into t_ordersetting (orderDate,number,reservations)
+         values(#{orderDate},#{number},#{reservations})
+    </insert>
+
+
+    <!--List<Map> getDataByMonth(String date);-->
+    <!--根据时间获取表中的数据-->
+    <select id="getDataByMonth" parameterType="string" resultType="map">
+        select DATE_FORMAT(orderDate,'%d') date,number,reservations from t_ordersetting
+        where DATE_FORMAT(orderDate,'%Y-%m')  = #{date};
+    </select>
+
+    <!--//通过日期查找预约设置
+    OrderSetting findByOrderDate(Date orderDate);-->
+    <select id="findByOrderDate" parameterType="date" resultType="com.itheima.pojo.OrderSetting">
+        select * from  t_ordersetting where orderDate=#{orderDate}
+    </select>
+
+
+    <!--//修改预约人数
+    void editReservationsByOrderDate(OrderSetting orderSetting);-->
+    <update id="editReservationsByOrderDate" parameterType="com.itheima.pojo.OrderSetting">
+        update t_ordersetting set reservations = #{reservations} where orderDate = #{orderDate}
+    </update>
+
+
+</mapper>

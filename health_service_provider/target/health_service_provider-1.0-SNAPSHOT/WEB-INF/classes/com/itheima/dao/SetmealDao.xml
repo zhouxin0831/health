@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.SetmealDao">
+
+    <!--Page<Setmeal> findByCcondition(String queryString);-->
+    <select id="findByCcondition" parameterType="String" resultType="com.itheima.pojo.Setmeal">
+        select * from t_setmeal
+        <if test="value!=null and value.length>0">
+            where code=#{value} or name=#{value} or helpCode=#{value}
+        </if>
+    </select>
+
+    <!--void add(Setmeal setmeal)-->
+    <!--新增套餐-->
+    <insert id="add" parameterType="com.itheima.pojo.Setmeal">
+        <selectKey resultType="java.lang.Integer" order="AFTER"
+                   keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into t_setmeal
+        (code,name,sex,age,helpCode,price,remark,attention,img)
+        values
+        (#{code},#{name},#{sex},#{age},#{helpCode},#{price},#{remark},#{attention},#{img})
+    </insert>
+    <!--void setSetmealAndChecekGroup(Map<String, Integer> map)-->
+    <!--设置中间表-->
+    <insert id="setSetmealAndChecekGroup" parameterType="map">
+        insert into t_setmeal_checkgroup(stmeal_id,checkgroup_id)
+        values(#{setmeal_id},#{checkgroup_id})
+    </insert>
+
+
+    <!--通过套餐id查询相关联的检查组id并回写-->
+    <!--List<Integer> findCheckGroupIdsBySetmealId(Integer id);-->
+    <select id="findCheckGroupIdsBySetmealId" parameterType="int" resultType="int">
+        select checkgroup_id from t_setmeal_checkgroup where setmeal_id=#{id}
+    </select>
+
+    <!--通过套餐id查询套餐数据并回写-->
+    <!--Setmeal findById(Integer id);-->
+    <select id="findById" parameterType="int" resultType="com.itheima.pojo.Setmeal">
+        select * from t_setmeal where id=#{id}
+    </select>
+
+
+    <!--void deleteBySetmealId(Integer id);-->
+    <!--通过套餐Id删除中间表套餐与检查组的关系-->
+    <delete id="deleteBySetmealId" parameterType="int">
+        delete from t_setmeal_checkgroup where setmeal_id=#{id}
+    </delete>
+
+
+    <!--void setSetmealIdAndChecekGroupId(Map<String, Integer> map);-->
+    <!--重新设置中间表套餐与检查组的关系-->
+    <insert id="setSetmealIdAndChecekGroupId" parameterType="map">
+        insert into t_setmeal_checkgroup("setmeal_id","checkgroup_id")  values(#{setmeal_id},#{checkgroup_id})
+    </insert>
+
+
+    <!--void edit(Setmeal setmeal, Integer[] checkigroupIds);-->
+    <update id="edit" parameterType="com.itheima.pojo.Setmeal">
+        update t_setmeal
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="code != null">
+                code = #{code},
+            </if>
+            <if test="helpCode != null">
+                helpCode = #{helpCode},
+            </if>
+            <if test="sex != null">
+                helpCode = #{helpCode},
+            </if>
+            <if test="age != null">
+                age = #{age},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="remark!=null">
+                remark=#{remark}
+            </if>
+            <if test="attention!=null">
+                attention=#{attention}
+            </if>
+            <if test="img!=null">
+                img=#{img}
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+
+    <!--List<Setmeal> findAll();-->
+    <!--查询套餐信息-->
+    <select id="findAll" resultType="com.itheima.pojo.Setmeal">
+        select * from t_setmeal
+    </select>
+    
+    
+    
+    
+    <resultMap id="setmeal_detail_resultmap" type="com.itheima.pojo.Setmeal">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="price" property="price"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+        <result column="img" property="img"/>
+        <collection property="checkGroups" ofType="com.itheima.pojo.CheckGroup">
+            <result column="checkgroup_name"  property="name"/>
+            <result column="checkgroup_remark" property="remark"/>
+            <collection property="checkItems" ofType="com.itheima.pojo.CheckItem">
+                <result column="checkitem_remark" property="remark"/>
+            </collection>
+        </collection>
+
+    </resultMap>
+
+
+<!--Setmeal findSetmealDetailById(Integer id); -->
+    <select id="findSetmealDetailById" parameterType="int" resultMap="setmeal_detail_resultmap">
+        select
+            s.*,
+            tc.name   checkgroup_name,
+            tc.remark checkgroup_remark,
+            t.name    checkitem_name
+        from
+            t_setmeal s
+            left join t_setmeal_checkgroup tsc on s.id = tsc.setmeal_id
+            left join t_checkgroup tc on tsc.checkgroup_id = tc.id
+            left join t_checkgroup_checkitem tcc on tc.id = tcc.checkgroup_id
+            left join t_checkitem t on tcc.checkitem_id = t.id
+        where
+            s.id = #{id}
+    </select>
+
+
+
+    <!--List<Map> findSetmealCount();-->
+
+    <select id="findSetmealCount" resultType="map">
+        select any_value(s.name) as name,any_value(s.price*count(o.id)) as price,count(o.id)  as num
+        from t_order o ,t_setmeal s
+        where o.setmeal_id = s.id
+        group by s.name
+    </select>
+
+
+</mapper>

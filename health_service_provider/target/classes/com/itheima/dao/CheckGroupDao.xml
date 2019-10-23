@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.CheckGroupDao">
+    <!--查询所有-->
+    <!--List<CheckGroup> findAll();-->
+    <select id="findAll" resultType="com.itheima.pojo.CheckGroup">
+        select * from t_checkgroup
+    </select>
+
+    <!--新增检查组-->
+    <insert id="add" parameterType="com.itheima.pojo.CheckGroup">
+
+        <selectKey resultType="java.lang.Integer" order="AFTER"
+                   keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into t_checkgroup(code,name,helpCode,sex,remark,attention)
+        values
+        (#{code},#{name},#{helpCode},#{sex},#{remark},#{attention})
+
+    </insert>
+
+    <insert id="setGroupAndCheckItem" parameterType="hashmap">
+        insert into t_checkgroup_checkitem(checkgroup_id,checkitem_id)
+        values(#{checkgroup_id},#{checkitem_id})
+    </insert>
+
+    <select id="seclectByCondition" parameterType="String" resultType="com.itheima.pojo.CheckGroup">
+        select * from t_checkgroup
+        <!--<if test="value!=null and value.length>0">
+            where code=#{code} or name=#{name} or helpCode=#{helpCode}
+        </if>-->
+        where code like #{value} or name like #{value} or helpCode like #{value}
+    </select>
+
+
+    <!--int findByCode(String code);-->
+
+    <select id="findByCode" parameterType="String" resultType="int">
+        select count(*) from t_checkgroup where code =#{code}
+    </select>
+
+    <!--int findByName(String name);-->
+    <select id="findByName" parameterType="String" resultType="int">
+        select count(*) from t_checkgroup where name=#{name}
+    </select>
+
+
+
+    <!--long findSetmealCountByCheckGroupId(Integer id);-->
+    <select id="findSetmealCountByCheckGroupId" parameterType="int" resultType="long">
+        select count(*) from t_setmeal_checkgroup where checkgroup_id=#{id}
+    </select>
+
+   <!-- void deleteCheckItemIdsByCheckGroupIds(Integer id);-->
+    <delete id="deleteCheckItemIdsByCheckGroupIds" parameterType="int">
+        delete from t_checkgroup_checkitem where checkgroup_id=#{id}
+    </delete>
+
+
+    <!--void deleteById(Integer id);-->
+    <delete id="deleteById" parameterType="int">
+        delete from t_checkgroup where id=#{id}
+    </delete>
+
+
+    <!--根据ID查询检查组-->
+    <!--CheckGroup findById(Integer id);-->
+    <select id="findById" parameterType="int" resultType="com.itheima.pojo.CheckGroup">
+        select * from t_checkgroup where id=#{id};
+    </select>
+
+
+    <!--List<Integer> findCheckItemIdsByCheckGroupId(Integer id);-->
+    <!--根据checkgroupId查询中间表相关联的checkItemId-->
+    <select id="findCheckItemIdsByCheckGroupId" parameterType="int" resultType="int">
+        select checkitem_id from t_checkgroup_checkitem where checkgroup_id=#{id};
+    </select>
+
+    <!--根据id删除中间表中的关联关系-->
+    <!--void deleteAssociation(Integer id);-->
+    <delete id="deleteAssociation" parameterType="int">
+        delete from t_checkgroup_checkitem where checkgroup_id=#{id}
+    </delete>
+
+    <!--void setCheckGroupAndCheckItem(Map<String, Integer> map);-->
+    <!--插入编辑后的id和checkItemsId-->
+    <insert id="setCheckGroupAndCheckItem" parameterType="map">
+        insert into t_checkgroup_checkitem(checkgroup_id,checkitem_id) values(#{checkgroup_id},#{checkitem_id})
+    </insert>
+    <!--更新表-->
+    <!--void edit(CheckGroup checkGroup);-->
+    <update id="edit" parameterType="com.itheima.pojo.CheckGroup">
+        update t_checkgroup
+        <set>
+
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="sex != null">
+                sex = #{sex},
+            </if>
+            <if test="code != null">
+                code = #{code},
+            </if>
+            <if test="helpCode != null">
+                helpCode = #{helpCode},
+            </if>
+            <if test="attention != null">
+                attention = #{attention},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    
+
+
+
+</mapper>
